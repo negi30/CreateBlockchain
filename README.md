@@ -1,90 +1,19 @@
-
-# Simple Blockchain Implementation in C++
-
-## Overview
-
-This project is a simple implementation of a blockchain with basic wallet functionality. The blockchain contains blocks, where each block contains multiple transactions. Wallets can perform transactions, sending and receiving funds, which are then added to the blockchain.
-
-## Features
-
-1. **Basic Blockchain**: Create a blockchain and add blocks to it. Each block has a hash, a timestamp, and a list of transactions.
-
-2. **Mining**: Blocks have a `mineBlock()` function that solves a proof-of-work problem.
-
-3. **Wallets**: Wallets with unique IDs can send and receive funds.
-
-4. **Transaction Validation**: Transactions are only valid if the wallet has sufficient balance.
-
-5. **Blockchain Integrity Check**: Check if the blockchain is valid based on previous and current block hashes.
-
-6. **Wallet Balance Notification**: After mining a block, wallet balances can be updated based on the transactions in the blockchain.
+#CreateBlockchain
 
 
----
+An dependency-lean blockchain architecture implemented in C++. This project is designed to demonstrate low-level ledger mechanics, encompassing asymmetric cryptographic verification, cryptographic hashing, and a localized Proof-of-Work (PoW) consensus algorithm.
 
-## How to Build and Run the Project
+## 🏗️ Technical Architecture & Cryptographic Showcase
 
-This project uses a Makefile to automate the build process. Follow these steps to build and run the project:
+This system models a fully verifiable, append-only ledger, bypassing high-level abstractions to interact directly with OpenSSL's C-bindings for core cryptographic operations.
 
-### Prerequisites
+### 1. Cryptographic Primitives (OpenSSL)
+*   **Asymmetric Encryption (RSA-2048):** Wallets dynamically generate 2048-bit RSA key pairs using `RSA_generate_key_ex`. The public exponent is strictly set to `RSA_F4` (65537, the 4th Fermat prime) to ensure optimal signature verification speed while maintaining strict coprime mathematical security against low-exponent attacks.
+*   **Digital Signatures:** Transactions are authenticated using `RSA_sign` and `RSA_verify`. The transaction payload (Sender, Receiver, Amount, Nonce) is flattened, hashed, and encrypted with the sender's private key. The network cryptographically audits this signature against the sender's public key before allowing ledger inclusion.
+*   **Cryptographic Hashing (SHA-256):** Block integrity and transaction fingerprints are secured via 32-byte SHA-256 digests, converting raw byte streams into deterministic 64-character hexadecimal strings.
 
-- Make sure you have `g++` and `make` installed on your system.
-- OpenSSL library is required for cryptographic functions. Install it if you haven't done so already:
-  - **Ubuntu/Debian**: `sudo apt-get install libssl-dev`
-  - **macOS with Homebrew**: `brew install openssl`
-  - **Windows**: You may need to download and install it manually from [OpenSSL's website](https://www.openssl.org/source/).
+### 2. State & Data Structures
+*   **The Ledger (`Blockchain.cpp`):** Utilizes `std::vector<Block>` to maintain state history. Enforces strict chronologic immutability.
+*   **Proof of Work (PoW):** The `mineBlock()` routine implements a computationally intensive `while` loop, aggressively incrementing a 32-bit `nonce` until the resultant SHA-256 hash satisfies the network's dynamically adjustable `difficulty` constraint (target zero-bits).
+*   **Memory Management:** Heap-allocated RSA key structures (`BIGNUM`, `RSA`) are strictly managed and safely deallocated in object destructors (`~Wallet()`) to prevent memory leaks during continuous node operation.
 
-### Building the Project
-
-1. **Clone the repository** to your local machine:
-    ```
-    git clone https://github.com/BlockchainProphet/SimpleBlockchainImplementation.git
-    ```
-
-2. **Navigate to the project directory**:
-    ```
-    cd SimpleBlockchainImplementation
-    ```
-
-3. **Run the Makefile**:
-    ```
-    make
-    ```
-    This will compile all the necessary files and create an executable named `blockchain_app`.
-
-### Running the Project
-
-After successful build, you can run the project by executing:
-
-```
-./blockchain_app
-```
-
-
-### Cleaning Up
-
-If you want to remove all the compiled files and the generated executable, run:
-
-```
-make clean
-```
-
-
-## Code Structure
-
-1. `main.cpp`: The driver program that demonstrates blockchain and wallet functionalities.
-2. `Blockchain.cpp` and `Blockchain.h`: Contains the `Blockchain` class that manages blocks and transactions.
-3. `Block.cpp` and `Block.h`: Defines the `Block` class for individual blocks in the blockchain.
-4. `Transaction.cpp` and `Transaction.h`: Contains the `Transaction` class that represents transactions between wallets.
-5. `Wallet.cpp` and `Wallet.h`: Contains the `Wallet` class that can send funds and update balances.
-
-## Recent Updates
-
-- Added wallet functionality for sending and receiving funds.
-- Wallets are notified and updated after each block is mined.
-- Improved the integrity check for the blockchain.
-
-## Dependencies
-
-- C++ Standard Library
-- OpenSSL for SHA-256 Hashing
