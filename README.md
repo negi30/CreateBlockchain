@@ -1,4 +1,4 @@
-#CreateBlockchain
+# CreateBlockchain
 
 
 An dependency-lean blockchain architecture implemented in C++. This project is designed to demonstrate low-level ledger mechanics, encompassing asymmetric cryptographic verification, cryptographic hashing, and a localized Proof-of-Work (PoW) consensus algorithm.
