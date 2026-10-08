@@ -50,26 +50,14 @@ int main() {
     });
 
     // POST /wallets
-    svr.Post("/wallets", [](const httplib::Request &req, httplib::Response &res) {
+    svr.Post("/wallets", [](const httplib::Request &, httplib::Response &res) {
         set_cors(res);
         std::lock_guard<std::mutex> lock(blockchain_mutex);
-        auto j = json::parse(req.body);
-        string name = j["id"];
         
-        // Prevent duplicate wallets
-        for (const auto& w : wallets) {
-            if (w->id == name) {
-                json error = {{"status", "error"}, {"message", "Wallet ID already exists"}};
-                res.status = 400;
-                res.set_content(error.dump(), "application/json");
-                return;
-            }
-        }
-
-        Wallet* newWallet = new Wallet(name);
+        Wallet* newWallet = new Wallet();
         wallets.push_back(newWallet);
         
-        json response = {{"status", "success"}, {"id", name}, {"balance", 0}};
+        json response = {{"status", "success"}, {"id", newWallet->id}, {"balance", 0}};
         res.set_content(response.dump(), "application/json");
     });
 

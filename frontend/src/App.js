@@ -15,8 +15,6 @@ function App() {
   const [difficulty, setDifficulty] = useState(2);
   const [isMining, setIsMining] = useState(false);
   
-  const [newWalletId, setNewWalletId] = useState('');
-  
   const [sender, setSender] = useState('');
   const [receiver, setReceiver] = useState('');
   const [amount, setAmount] = useState('');
@@ -44,10 +42,8 @@ function App() {
 
   const createWallet = async (e) => {
     e.preventDefault();
-    if (!newWalletId) return;
     try {
-      await axios.post(`${API_URL}/wallets`, { id: newWalletId });
-      setNewWalletId('');
+      await axios.post(`${API_URL}/wallets`, {});
       fetchData();
     } catch (err) {
       alert(err.response?.data?.message || "Failed to create wallet");
@@ -109,13 +105,7 @@ function App() {
               ))}
             </ul>
             <form onSubmit={createWallet} className="inline-form">
-              <input 
-                placeholder="New Wallet ID" 
-                value={newWalletId} 
-                onChange={(e) => setNewWalletId(e.target.value)}
-                disabled={isMining}
-              />
-              <button type="submit" disabled={isMining}>Create</button>
+              <button type="submit" disabled={isMining}>Generate Cryptographic Wallet</button>
             </form>
           </section>
 

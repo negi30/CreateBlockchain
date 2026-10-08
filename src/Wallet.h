@@ -8,7 +8,9 @@
 
 class Wallet {
 public:
-    Wallet(std::string id); // Constructor with wallet ID
+    Wallet(std::string id); // Constructor for hardcoded Genesis
+    Wallet();               // True cryptographic constructor
+
     ~Wallet();  // Destructor to free RSA keys
 
     // Method to send funds to another wallet

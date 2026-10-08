@@ -1,12 +1,44 @@
 #include "Wallet.h"
 #include <iostream>  // Include iostream for std::cerr
+#include <iomanip>
+#include <sstream>
 #include <openssl/rand.h>
 #include <openssl/pem.h>
+#include <openssl/sha.h>
 
 // Constructor to initialize a Wallet with given ID
 
 Wallet::Wallet(std::string id) : id(id), balance(0.0f), publicKey(nullptr), privateKey(nullptr) {
     generateKeys();
+}
+
+// True cryptographic constructor that derives its ID from a SHA-256 hash of its Public Key
+Wallet::Wallet() : balance(0.0f), publicKey(nullptr), privateKey(nullptr) {
+    generateKeys();
+    
+    // Extract public key to string
+    BIO *bio = BIO_new(BIO_s_mem());
+    PEM_write_bio_RSAPublicKey(bio, publicKey);
+    size_t keylen = BIO_pending(bio);
+    char* publicKeyStr = (char*)malloc(keylen + 1);
+    BIO_read(bio, publicKeyStr, keylen);
+    publicKeyStr[keylen] = '\0';
+    
+    // Hash it with SHA-256
+    unsigned char hash[SHA256_DIGEST_LENGTH];
+    SHA256(reinterpret_cast<const unsigned char*>(publicKeyStr), keylen, hash);
+    
+    // Convert hash to hexadecimal address (like Ethereum, taking first 20 bytes)
+    std::stringstream ss;
+    ss << "0x";
+    for (int i = 0; i < 20; i++) {
+        ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(hash[i]);
+    }
+    
+    this->id = ss.str();
+    
+    free(publicKeyStr);
+    BIO_free_all(bio);
 }
 
 // Destructor to free RSA key pairs
