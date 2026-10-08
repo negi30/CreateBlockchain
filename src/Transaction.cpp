@@ -4,6 +4,7 @@
 #include <openssl/err.h>
 #include <iostream>
 #include <iomanip> // for std::hex and std::setw
+#include <vector>
 
 // Debugging function to print the hash
 void debugPrintHash(unsigned char* hash, size_t length) {
@@ -25,19 +26,16 @@ void Transaction::sign(RSA* privateKey) {
     unsigned char hash[SHA256_DIGEST_LENGTH];
     SHA256(reinterpret_cast<const unsigned char*>(dataToSign.c_str()), dataToSign.size(), hash);
 
-
-#include <vector>
-
-    std::vector<unsigned char> sign(RSA_size(privateKey));  // Correct size for the signature
+    std::vector<unsigned char> sigBuffer(RSA_size(privateKey));  // Correct size for the signature
     unsigned int sLen;
 
-    if (RSA_sign(NID_sha256, hash, SHA256_DIGEST_LENGTH, sign.data(), &sLen, privateKey) != 1) {
+    if (RSA_sign(NID_sha256, hash, SHA256_DIGEST_LENGTH, sigBuffer.data(), &sLen, privateKey) != 1) {
         // Handle error.
         std::cout << "Signing failed.\n";
         return;
     }
 
-    signature.assign(reinterpret_cast<char*>(sign.data()), sLen);
+    signature.assign(reinterpret_cast<char*>(sigBuffer.data()), sLen);
     signatureLength = sLen;  // Store the signature length
 
     std::cout << "Signed successfully. Signature Length: " << signatureLength << "\n";
