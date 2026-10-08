@@ -56,6 +56,16 @@ int main() {
         auto j = json::parse(req.body);
         string name = j["id"];
         
+        // Prevent duplicate wallets
+        for (const auto& w : wallets) {
+            if (w->id == name) {
+                json error = {{"status", "error"}, {"message", "Wallet ID already exists"}};
+                res.status = 400;
+                res.set_content(error.dump(), "application/json");
+                return;
+            }
+        }
+
         Wallet* newWallet = new Wallet(name);
         wallets.push_back(newWallet);
         

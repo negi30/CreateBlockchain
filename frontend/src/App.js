@@ -13,6 +13,7 @@ function App() {
   const [pendingTransactions, setPendingTransactions] = useState(0);
   const [isValid, setIsValid] = useState(true);
   const [difficulty, setDifficulty] = useState(2);
+  const [isMining, setIsMining] = useState(false);
   
   const [newWalletId, setNewWalletId] = useState('');
   
@@ -44,9 +45,13 @@ function App() {
   const createWallet = async (e) => {
     e.preventDefault();
     if (!newWalletId) return;
-    await axios.post(`${API_URL}/wallets`, { id: newWalletId });
-    setNewWalletId('');
-    fetchData();
+    try {
+      await axios.post(`${API_URL}/wallets`, { id: newWalletId });
+      setNewWalletId('');
+      fetchData();
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to create wallet");
+    }
   };
 
   const sendTransaction = async (e) => {
@@ -66,8 +71,14 @@ function App() {
   };
 
   const mineBlocks = async () => {
-    await axios.post(`${API_URL}/mine`);
-    fetchData();
+    setIsMining(true);
+    try {
+      await axios.post(`${API_URL}/mine`);
+      await fetchData();
+    } catch (err) {
+      alert("Mining failed or timed out.");
+    }
+    setIsMining(false);
   };
 
   const changeDifficulty = async (newDiff) => {
@@ -102,19 +113,20 @@ function App() {
                 placeholder="New Wallet ID" 
                 value={newWalletId} 
                 onChange={(e) => setNewWalletId(e.target.value)}
+                disabled={isMining}
               />
-              <button type="submit">Create</button>
+              <button type="submit" disabled={isMining}>Create</button>
             </form>
           </section>
 
           <section className="card">
             <h2><Send size={20}/> Send Funds</h2>
             <form onSubmit={sendTransaction} className="vertical-form">
-              <select value={sender} onChange={(e) => setSender(e.target.value)}>
+              <select value={sender} onChange={(e) => setSender(e.target.value)} disabled={isMining}>
                 <option value="">Select Sender...</option>
                 {wallets.map(w => <option key={w.id} value={w.id}>{w.id} ({w.balance})</option>)}
               </select>
-              <select value={receiver} onChange={(e) => setReceiver(e.target.value)}>
+              <select value={receiver} onChange={(e) => setReceiver(e.target.value)} disabled={isMining}>
                 <option value="">Select Receiver...</option>
                 {wallets.map(w => <option key={w.id} value={w.id}>{w.id}</option>)}
               </select>
@@ -123,8 +135,9 @@ function App() {
                 placeholder="Amount" 
                 value={amount} 
                 onChange={(e) => setAmount(e.target.value)}
+                disabled={isMining}
               />
-              <button type="submit">Sign & Send</button>
+              <button type="submit" disabled={isMining}>Sign & Send</button>
             </form>
           </section>
 
@@ -138,6 +151,7 @@ function App() {
                 max="5" 
                 value={difficulty} 
                 onChange={(e) => changeDifficulty(parseInt(e.target.value))}
+                disabled={isMining}
               />
               <small>Higher difficulty exponentially increases mining time.</small>
             </div>
@@ -149,8 +163,12 @@ function App() {
            <section className="card">
             <div className="card-header">
               <h2><Pickaxe size={20}/> Pending Transactions ({pendingTransactions})</h2>
-              <button onClick={mineBlocks} className="mine-btn" disabled={pendingTransactions === 0}>
-                Mine Block
+              <button 
+                onClick={mineBlocks} 
+                className="mine-btn" 
+                disabled={pendingTransactions === 0 || isMining}
+              >
+                {isMining ? "Mining (Wait)..." : "Mine Block"}
               </button>
             </div>
             {pendingTransactions === 0 ? (
