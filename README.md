@@ -31,6 +31,14 @@ This project utilizes **CMake**, orchestrating an automated build process across
 * **OpenSSL** (v3.0+)
 * **Node.js & npm** (For the React Frontend)
 
+#### Dependency Installation (Cross-Platform)
+* **macOS:** `brew install cmake openssl@3 node`
+* **Linux (Ubuntu/Debian):** `sudo apt install cmake libssl-dev build-essential npm`
+* **Windows (MSYS2):** The architecture is fully compatible with Windows. Open an MSYS2 MinGW-w64 terminal and run:
+  ```bash
+  pacman -S mingw-w64-x86_64-cmake mingw-w64-x86_64-openssl mingw-w64-x86_64-gcc mingw-w64-x86_64-nodejs
+  ```
+
 ### Compilation & Daemon Execution
 
 1. **Compile the Backend (C++)**
