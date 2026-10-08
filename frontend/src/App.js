@@ -3,7 +3,9 @@ import axios from 'axios';
 import { Coins, Send, Pickaxe, CheckCircle, XCircle, Settings } from 'lucide-react';
 import './App.css';
 
-const API_URL = 'http://localhost:8080';
+const API_URL = window.location.hostname === 'localhost' 
+  ? 'http://localhost:8080' 
+  : window.location.origin;
 
 function App() {
   const [wallets, setWallets] = useState([]);

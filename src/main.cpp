@@ -181,6 +181,9 @@ int main() {
         res.set_content(response.dump(), "application/json");
     });
 
+    // Serve React Frontend
+    svr.set_mount_point("/", "./frontend/build");
+
     cout << "Starting Backend Server on http://localhost:8080" << endl;
     svr.listen("0.0.0.0", 8080);
 
