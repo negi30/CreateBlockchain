@@ -92,8 +92,16 @@ int main() {
             return;
         }
 
-        if (sender->balance < amount) {
-            json error = {{"status", "error"}, {"message", "Insufficient balance"}};
+        // Calculate pending outgoing funds
+        float pendingOut = 0;
+        for (const auto& tx : myBlockchain.pendingTransactions) {
+            if (tx.sender == senderId) {
+                pendingOut += tx.amount;
+            }
+        }
+
+        if (sender->balance - pendingOut < amount) {
+            json error = {{"status", "error"}, {"message", "Insufficient balance (including pending transactions)"}};
             res.status = 400;
             res.set_content(error.dump(), "application/json");
             return;

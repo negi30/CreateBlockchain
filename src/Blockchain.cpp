@@ -73,10 +73,16 @@ void Blockchain::printChain() {
 
 // Notify wallets with updated transactions and balances
 void Blockchain::notifyWallets(std::vector<Wallet*>& wallets) {
+    // Register all public keys
     for (auto& wallet : wallets) {
-        publicKeyMap[wallet->id] = wallet->publicKey;  // Store the public key in the map
-        for (auto& block : chain) {
-            wallet->updateBalance(block.transactions);
+        publicKeyMap[wallet->id] = wallet->publicKey;
+    }
+    
+    // Only update balances based on the newly mined block (prevent double counting)
+    if (!chain.empty()) {
+        const auto& latestBlock = chain.back();
+        for (auto& wallet : wallets) {
+            wallet->updateBalance(latestBlock.transactions);
         }
     }
 }
